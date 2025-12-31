@@ -1,20 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ORIGINAL SIZE LOGO PARTICLES</title>
+    <title>SMOOTH LOGO PARTICLES</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #000; overflow: hidden; }
-        canvas { 
-            position: fixed; top: 0; left: 0; 
-            width: 100vw; height: 100vh; 
-            cursor: none;
-        }
-        #logoInput {
-            position: fixed; top: 20px; left: 20px; 
-            z-index: 100; background: #333; color: white;
-            padding: 10px; border-radius: 5px;
-        }
+        canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; cursor: none; }
+        #logoInput { position: fixed; top: 20px; left: 20px; z-index: 100; background: #333; color: white; padding: 10px; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -38,12 +30,10 @@
             mouseY = e.clientY;
         });
         
-        // **KEEPS ORIGINAL LOGO DIMENSIONS**
         logoInput.addEventListener('change', e => {
             const file = e.target.files[0];
             const img = new Image();
             img.onload = () => {
-                // Use EXACT logo dimensions
                 logoWidth = img.naturalWidth;
                 logoHeight = img.naturalHeight;
                 
@@ -51,18 +41,16 @@
                 const tctx = temp.getContext('2d');
                 temp.width = logoWidth;
                 temp.height = logoHeight;
-                
-                // Draw at ORIGINAL size
-                tctx.drawImage(img, 0, 0, logoWidth, logoHeight);
+                tctx.drawImage(img, 0, 0);
                 const data = tctx.getImageData(0, 0, logoWidth, logoHeight);
                 
-                // Sample pixels → particles
                 particles = [];
-                const centerX = canvas.width / 1.5;
-                const centerY = canvas.height / 1.5;
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
                 
-                for(let y = 0; y < logoHeight; y += 4) {
-                    for(let x = 0; x < logoWidth; x += 4) {
+                // **FIXED: 8px steps = ~1-2k particles (smooth)**
+                for(let y = 0; y < logoHeight; y += 3) {  // WAS 2 → NOW 8
+                    for(let x = 0; x < logoWidth; x += 3) {  // WAS 2 → NOW 8
                         const i = (y * logoWidth + x) * 4;
                         if(data.data[i + 3] > 100) {
                             particles.push({
@@ -72,11 +60,12 @@
                                 y: centerY - logoHeight/2 + y,
                                 vx: 0,
                                 vy: 0,
-                                size: 0.5
+                                size: 0.5  // WAS 0.2 → NOW 2.0 (VISIBLE)
                             });
                         }
                     }
                 }
+                console.log(`✅ ${particles.length} particles created - SMOOTH!`);
             };
             img.src = URL.createObjectURL(file);
         });
